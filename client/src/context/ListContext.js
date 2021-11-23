@@ -131,7 +131,11 @@ export const ListContextProvider = (props) => {
     // Get logged in user's items
     const getItems = async () => {
         try {
-            const res = await axios.get('/api/todo');
+            const res = await axios.get('/api/todo',  {
+                headers: {
+                    'Authorization': localStorage.getItem('token')
+                }
+            });
 
             // console.log(res.data);
             const items = res.data.items;

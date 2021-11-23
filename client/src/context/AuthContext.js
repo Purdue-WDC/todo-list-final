@@ -1,10 +1,10 @@
-import React, { useReducer } from "react";
+import React, { useEffect, useReducer } from "react";
 import axios from "axios";
 
 const initialState = {
-	user: null,
-	authenticated: false,
-	token: null,
+	user: JSON.parse(localStorage.getItem("user")),
+	authenticated: localStorage.getItem("token") ? true : false,
+	token: localStorage.getItem("token"),
 };
 
 const AUTHENTICATED = "AUTHENTICATED";
@@ -15,12 +15,13 @@ const AuthContext = React.createContext({
 	login: () => {},
 	logout: () => {},
 	register: () => {},
-    getUser: () => {}
+	getUser: () => {},
 });
 
 const AuthReducer = (state, action) => {
 	switch (action.type) {
 		case AUTHENTICATED:
+			localStorage.setItem("user", JSON.stringify(action.payload));
 			return {
 				user: action.payload,
 				authenticated: true,
@@ -28,6 +29,7 @@ const AuthReducer = (state, action) => {
 			};
 		case LOGOUT:
 			localStorage.removeItem("token");
+			localStorage.removeItem("user");
 			axios.defaults.headers.common["Authorization"] = "";
 			return {
 				user: null,
@@ -41,6 +43,19 @@ const AuthReducer = (state, action) => {
 
 export const AuthContextProvider = (props) => {
 	const [state, dispatch] = useReducer(AuthReducer, initialState);
+
+	useEffect(() => {
+		if (state.token) {
+			try {
+				getUser(state.token);
+				axios.defaults.headers.common["Authorization"] = state.token;
+			} catch (err) {
+				dispatch({
+					type: LOGOUT
+				})
+			}
+		}
+	}, []);
 
 	// Login user
 	const login = async (user) => {
@@ -96,7 +111,7 @@ export const AuthContextProvider = (props) => {
 				payload: res.data.user,
 			});
 		} catch (err) {
-			alert("Something went wrong");
+			throw new Error('Something went wrong');
 		}
 	};
 
@@ -108,7 +123,7 @@ export const AuthContextProvider = (props) => {
 				login,
 				logout,
 				register,
-                getUser
+				getUser,
 			}}
 		>
 			{props.children}

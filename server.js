@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const express = require('express');
 const path = require('path');
-// require('dotenv').config();
+require('dotenv').config();
 const app = express();
 
 // Import routes from respective files
