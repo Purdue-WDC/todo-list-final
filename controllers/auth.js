@@ -2,7 +2,7 @@ const User = require("../models/User");
 
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-require("dotenv").config();
+// require("dotenv").config();
 
 exports.login = async (req, res) => {
 	const { email, password } = req.body;
